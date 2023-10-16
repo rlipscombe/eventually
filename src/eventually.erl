@@ -41,6 +41,8 @@ do_assert(Probe, Acc, Matcher, Attempt, Options = #{max_attempts := MaxAttempts}
             case Matcher(NextAcc) of
                 true ->
                     true;
+                {true, Result} ->
+                    Result;
                 _ ->
                     do_retry(Probe, NextAcc, Matcher, Attempt, Options)
             end
@@ -50,6 +52,8 @@ do_assert(Probe, Acc, Matcher, _Attempt, _Options) ->
     case Matcher(Probe(Acc)) of
         true ->
             true;
+        {true, Result} ->
+            Result;
         _ ->
             % TODO: Can we report something more useful here?
             error(eventually_assert)
