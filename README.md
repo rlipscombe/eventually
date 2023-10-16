@@ -30,6 +30,12 @@ I decided to reimplement this mechanism in a new project, for two reasons:
 Because `assert` isn't a great project name, this project is called `eventually` instead. So it's `eventually:assert()`,
 rather than `assert:eventually()`.
 
+## Running self-tests
+
+```sh
+rebar3 eunit
+```
+
 ## Simple conditions
 
 For example:
