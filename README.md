@@ -4,11 +4,11 @@ Assertions in an asynchronous world.
 
 ## Background
 
-In [this blog post](https://blog.differentpla.net/blog/2020/09/14/erlang-common-test/), I wrote about using Erlang's
-Common Test for system testing. Because the system is asynchronous, we needed a way to assert results without running
-into race conditions.
+In [this blog post](https://blog.differentpla.net/blog/2020/09/14/erlang-common-test/), I wrote about how Electric Imp
+uses Erlang's Common Test for system testing.
 
-To do this, we invented `assert:eventually()`, which might look something like this:
+Because the system is asynchronous, we needed a way to assert results without running into race conditions. To do this,
+we invented `assert:eventually()`, which might look something like this:
 
 ```erlang
 %...
