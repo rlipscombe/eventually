@@ -27,7 +27,6 @@ error_all_attempts_test() ->
         computer_says_no,
         eventually:assert(fun() ->
             put(?FUNCTION_NAME, get(?FUNCTION_NAME) + 1),
-
             error(computer_says_no)
         end)
     ),
@@ -36,3 +35,15 @@ error_all_attempts_test() ->
 badmatch_error_all_attempts_test() ->
     NotOk = fun() -> not_ok end,
     ?assertError({badmatch, not_ok}, eventually:assert(fun() -> ok = NotOk() end)).
+
+configurable_attempts_test() ->
+    % If we throw an error, do we get retried?
+    put(?FUNCTION_NAME, 0),
+    ?assertError(
+        eventually_assert,
+        eventually:assert(fun() ->
+            put(?FUNCTION_NAME, get(?FUNCTION_NAME) + 1),
+            false
+        end, #{max_attempts => 7})
+    ),
+    ?assertEqual(7, get(?FUNCTION_NAME)).
