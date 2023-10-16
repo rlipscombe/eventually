@@ -116,9 +116,20 @@ Sometimes you want to collect the results from the probe:
 The above can either be done by collecting the messages, or by incrementing a counter. Either way, you need to pass
 state from one call to the probe to the next.
 
+## Returning a value from the assertion
+
+Once you've polled for a particular condition, you might want to perform more assertions. To enable this, you can return
+a value from either the probe (if it's a simple probe) or from the matcher (if there is one). For example:
+
+```erlang
+    Body = eventually:assert(assert_http:get(Url), assert_http:has_status_code(200)).
+    ?assertMatch(#{<<"user_roles">> := [<<"admin">>]}, jsx:decode(Body)).
+```
+
+This allows polling until you get a well-formed result, without retrying if it doesn't match the expectation.
+
 ## Future
 
 - Do we want to allow configurable (exponential) backoff for retries?
 - Labels/descriptions for the probe.
-- Returning a value from the assertion, for use later in the test.
 - Combinators: `all` and `any`, e.g.
