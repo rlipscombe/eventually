@@ -69,6 +69,35 @@ Some tests are slightly more readable or reusable if you separate the probe from
     eventually:assert(assert_http:get(Url), assert_http:has_body(<<"OK">>)).
 ```
 
+```erlang
+-module(assert_http).
+-export([get/1]).
+-export([has_body/1]).
+
+get(Url) ->
+    fun() ->
+        httpc:request(Url),
+    end.
+
+has_body(Expected) ->
+    fun({ok, {{_, 200, _}, _Headers, Body}}) -> Body =:= Expected end.
+```
+
+The above has the result from `httpc:request/1` being returned directly from the probe. Alternatively, we could have done a bit of reframing:
+
+```erlang
+get(Url) ->
+    fun() ->
+        {ok, {{_, 200, _}, Headers, Body}} = httpc:request(Url),
+        #{headers => Headers, body => Body}
+    end.
+
+has_body(Expected) ->
+    fun(#{body := Body}) -> Body =:= Expected end.
+```
+
+It's a style thing. Neither is particularly better than the other.
+
 This allows you to avoid repetition of the HTTP client code, while matching on different results:
 
 ```erlang
