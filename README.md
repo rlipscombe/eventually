@@ -121,3 +121,4 @@ state from one call to the probe to the next.
 - Do we want to allow configurable (exponential) backoff for retries?
 - Labels/descriptions for the probe.
 - Returning a value from the assertion, for use later in the test.
+- Combinators: `all` and `any`, e.g.
