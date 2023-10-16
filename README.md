@@ -61,10 +61,34 @@ server_is_available(Host, Port) ->
 
 Any exception thrown by the probe is treated as a failure, which causes a retry. This simplifies writing the probe.
 
+## Separate probe and matcher
+
+Some tests are slightly more readable or reusable if you separate the probe from the condition (which we call a "matcher"):
+
+```erlang
+    eventually:assert(assert_http:get(Url), assert_http:has_body(<<"OK">>)).
+```
+
+This allows you to avoid repetition of the HTTP client code, while matching on different results:
+
+```erlang
+    eventually:assert(assert_http:get(Url), assert_http:has_body(<<"Not found">>)).
+```
+
+## Accumulating probe
+
+Sometimes you want to collect the results from the probe:
+
+```erlang
+    % Wait until three messages are received
+    eventually:assert(messages_received(), has_count(3)).
+```
+
+The above can either be done by collecting the messages, or by incrementing a counter. Either way, you need to pass
+state from one call to the probe to the next.
+
 ## Future
 
-- The probe might want to accumulate stuff, for example `messages_received()`.
 - Do we want to allow configurable (exponential) backoff for retries?
 - Labels/descriptions for the probe.
-- Separating the probe from the condition/matcher.
 - Returning a value from the assertion, for use later in the test.

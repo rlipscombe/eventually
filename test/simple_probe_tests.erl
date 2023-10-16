@@ -20,6 +20,19 @@ passes_last_attempt_test() ->
 fails_all_attempts_test() ->
     ?assertError(eventually_assert, eventually:assert(fun() -> false end)).
 
-throws_all_attempts_test() ->
+error_all_attempts_test() ->
+    % If we throw an error, do we get retried?
+    put(?FUNCTION_NAME, 0),
+    ?assertError(
+        computer_says_no,
+        eventually:assert(fun() ->
+            put(?FUNCTION_NAME, get(?FUNCTION_NAME) + 1),
+
+            error(computer_says_no)
+        end)
+    ),
+    ?assertEqual(5, get(?FUNCTION_NAME)).
+
+badmatch_error_all_attempts_test() ->
     NotOk = fun() -> not_ok end,
     ?assertError({badmatch, not_ok}, eventually:assert(fun() -> ok = NotOk() end)).
