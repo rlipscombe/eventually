@@ -39,6 +39,8 @@ do_assert(Probe, Acc, Matcher, Attempt, Options = #{max_attempts := MaxAttempts}
             do_retry(Probe, Acc, Matcher, Attempt, Options);
         NextAcc ->
             case Matcher(NextAcc) of
+                ok ->
+                    true;
                 true ->
                     true;
                 {true, Result} ->
@@ -51,6 +53,8 @@ do_assert(Probe, Acc, Matcher, _Attempt, _Options) ->
     % On the final attempt, don't catch the exception; it's better if the test sees it.
     NextAcc = Probe(Acc),
     case Matcher(NextAcc) of
+        ok ->
+            true;
         true ->
             true;
         {true, Result} ->
