@@ -13,16 +13,19 @@ accumulating_probe_test() ->
         Self ! two,
         Self ! three,
         Self ! four,
-        Self ! five
+        Self ! five,
+        Self ! six
     end),
-    eventually:assert(messages_received(), contains_message(five)).
+    eventually:assert(messages_received(), contains_message(six)).
 
 messages_received() ->
     {
-        fun(Acc) ->
+        fun Receive(Acc) ->
             receive
                 M ->
-                    [M | Acc]
+                    Receive([M | Acc])
+            after 0 ->
+                Acc
             end
         end,
         []
