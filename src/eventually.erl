@@ -4,6 +4,7 @@
     assert/2,
     assert/3
 ]).
+-export([format_error/2]).
 
 -define(DEFAULT_MAX_ATTEMPTS, 5).
 -define(DEFAULT_SLEEP_MS, 250).
@@ -141,3 +142,36 @@ do_retry(
 
 assert_error(Probe, Matcher) ->
     erlang:error(eventually_assert_failed, [Probe, Matcher], [{error_info, #{module => ?MODULE}}]).
+
+format_error(_Reason, [{_M, _F, _Args = [Probe, Matcher], Info} | _]) ->
+    ErrorInfo = proplists:get_value(error_info, Info, #{}),
+    ErrorMap = maps:get(cause, ErrorInfo, #{}),
+    % TODO: Not really an argument, so we need to do something different. I don't understand the new error stuff well
+    % enough right now, though.
+    ErrorMap#{
+        1 => format_error_message(Probe, Matcher)
+    }.
+
+format_error_message(
+    #probe{description = ProbeDescription},
+    #matcher{description = MatcherDescription}
+) when ProbeDescription /= undefined, MatcherDescription /= undefined ->
+    lists:flatten(
+        io_lib:format("probe ~p, matching ~p, eventually failed", [
+            ProbeDescription, MatcherDescription
+        ])
+    );
+format_error_message(
+    #probe{description = ProbeDescription},
+    #matcher{}
+) when ProbeDescription /= undefined ->
+    lists:flatten(
+        io_lib:format("probe ~p eventually failed", [
+            ProbeDescription
+        ])
+    );
+format_error_message(
+    #probe{},
+    #matcher{}
+) ->
+    "probe eventually failed".
