@@ -18,7 +18,7 @@ passes_last_attempt_test() ->
     eventually:assert(Probe).
 
 fails_all_attempts_test() ->
-    ?assertError(eventually_assert, eventually:assert(fun() -> false end)).
+    ?assertError(eventually_assert_failed, eventually:assert(fun() -> false end)).
 
 error_all_attempts_test() ->
     % If we throw an error, do we get retried?
@@ -40,7 +40,7 @@ configurable_attempts_test() ->
     % If we throw an error, do we get retried?
     put(?FUNCTION_NAME, 0),
     ?assertError(
-        eventually_assert,
+        eventually_assert_failed,
         eventually:assert(fun() ->
             put(?FUNCTION_NAME, get(?FUNCTION_NAME) + 1),
             false
