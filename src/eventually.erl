@@ -54,6 +54,18 @@ assert({Probe, Init}, Matcher) when is_function(Probe, 1), is_function(Matcher, 
     do_assert(
         #probe{probe = Probe, state = Init}, #matcher{matcher = Matcher}, 1, default_options()
     );
+assert(#{probe := Probe, description := ProbeDescription}, #{
+    matcher := Matcher, description := MatcherDescription
+}) when
+    is_function(Probe, 0), is_function(Matcher, 1)
+->
+    Probe1 = fun(_) -> Probe() end,
+    do_assert(
+        #probe{probe = Probe1, state = undefined, description = ProbeDescription},
+        #matcher{matcher = Matcher, description = MatcherDescription},
+        1,
+        default_options()
+    );
 assert(#{probe := Probe, state := Init, description := ProbeDescription}, #{
     matcher := Matcher, description := MatcherDescription
 }) when
@@ -146,10 +158,8 @@ assert_error(Probe, Matcher) ->
 format_error(_Reason, [{_M, _F, _Args = [Probe, Matcher], Info} | _]) ->
     ErrorInfo = proplists:get_value(error_info, Info, #{}),
     ErrorMap = maps:get(cause, ErrorInfo, #{}),
-    % TODO: Not really an argument, so we need to do something different. I don't understand the new error stuff well
-    % enough right now, though.
     ErrorMap#{
-        1 => format_error_message(Probe, Matcher)
+        general => format_error_message(Probe, Matcher)
     }.
 
 format_error_message(
