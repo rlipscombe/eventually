@@ -121,7 +121,9 @@ do_assert(
                         Matcher,
                         Attempt,
                         Options
-                    )
+                    );
+                _ ->
+                    error(bad_return)
             end
     end;
 do_assert(
@@ -140,7 +142,9 @@ do_assert(
         {true, Result} ->
             Result;
         false ->
-            assert_error(Probe, Matcher)
+            assert_error(Probe, Matcher);
+        _ ->
+            error(bad_return)
     end.
 
 do_retry(
