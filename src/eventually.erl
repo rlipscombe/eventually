@@ -107,7 +107,8 @@ do_assert(
         {'EXIT', _} ->
             do_retry(Probe, Matcher, Attempt, Options);
         NextState ->
-            case MatcherFun(NextState) of
+            NextProbe = Probe#probe{state = NextState},
+            case catch MatcherFun(NextState) of
                 ok ->
                     true;
                 true ->
@@ -115,13 +116,9 @@ do_assert(
                 {true, Result} ->
                     Result;
                 false ->
-                    NextProbe = Probe#probe{state = NextState},
-                    do_retry(
-                        NextProbe,
-                        Matcher,
-                        Attempt,
-                        Options
-                    );
+                    do_retry(NextProbe, Matcher, Attempt, Options);
+                {'EXIT', _} ->
+                    do_retry(NextProbe, Matcher, Attempt, Options);
                 _ ->
                     error(bad_return)
             end
