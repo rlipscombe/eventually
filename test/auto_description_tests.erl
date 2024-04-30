@@ -1,27 +1,28 @@
--module(description_tests).
+-module(auto_description_tests).
 -include_lib("eunit/include/eunit.hrl").
 
-probe_description_test() ->
+auto_probe_description_test() ->
     assert_format_error(
-        "probe always_fail, matching default_matcher, eventually failed",
+        "probe \"auto_description_tests:-auto_probe_description_test/0-fun-0-/0\", "
+        "matching default_matcher, eventually failed",
         fun() ->
             eventually:assert(
-                eventually:probe(fun() -> false end, always_fail)
+                eventually:probe(fun() -> false end)
             )
         end
     ).
 
-both_description_test() ->
+auto_match_description_test() ->
     assert_format_error(
-        "probe always_fail, matching never_match, eventually failed",
+        "probe \"auto_description_tests:-auto_match_description_test/0-fun-1-/0\", "
+        "matching \"auto_description_tests:-auto_match_description_test/0-fun-0-/1\", eventually failed",
         fun() ->
             eventually:assert(
-                eventually:probe(fun() -> false end, always_fail),
-                eventually:match(fun(_) -> false end, never_match)
+                eventually:probe(fun() -> true end),
+                eventually:match(fun(_) -> false end)
             )
         end
-    ),
-    ok.
+    ).
 
 assert_format_error(Expected, Fun) ->
     case catch Fun() of

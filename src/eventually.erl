@@ -1,5 +1,12 @@
 -module(eventually).
 -export([
+    probe/1,
+    probe/2,
+    probe/3,
+
+    match/1,
+    match/2,
+
     assert/1,
     assert/2,
     assert/3
@@ -20,70 +27,61 @@
     matcher
 }).
 
+probe(Fun) when is_function(Fun, 0) ->
+    Fun1 = fun(_) -> Fun() end,
+    Description = get_fun_description(Fun),
+    probe(Fun1, undefined, Description).
+
+probe(Fun, Init) when is_function(Fun, 1) ->
+    Description = get_fun_description(Fun),
+    probe(Fun, Init, Description);
+probe(Fun, Description) when is_function(Fun, 0) ->
+    Fun1 = fun(_) -> Fun() end,
+    probe(Fun1, undefined, Description).
+
+probe(Fun, Init, Description) when is_function(Fun, 1) ->
+    #probe{
+        description = Description,
+        probe = Fun,
+        state = Init
+    }.
+
+match(Fun) when is_function(Fun, 1) ->
+    Description = get_fun_description(Fun),
+    match(Fun, Description).
+
+match(Fun, Description) when is_function(Fun, 1) ->
+    #matcher{
+        description = Description,
+        matcher = Fun
+    }.
+
+default_matcher() ->
+    match(fun(Value) -> Value end, default_matcher).
+
+get_fun_description(Fun) ->
+    Info = erlang:fun_info(Fun),
+    Module = proplists:get_value(module, Info),
+    Name = proplists:get_value(name, Info),
+    Arity = proplists:get_value(arity, Info),
+    lists:flatten(io_lib:format("~s:~s/~B", [Module, Name, Arity])).
+
 assert(Probe) when is_function(Probe, 0) ->
-    Probe1 = fun(_) -> Probe() end,
-    Matcher = fun(Value) -> Value end,
-    do_assert(
-        #probe{probe = Probe1, state = undefined}, #matcher{matcher = Matcher}, 1, default_options()
-    );
-assert(#{probe := Probe, description := Description}) when is_function(Probe, 0) ->
-    Probe1 = fun(_) -> Probe() end,
-    Matcher = fun(Value) -> Value end,
-    do_assert(
-        #probe{probe = Probe1, state = undefined, description = Description},
-        #matcher{matcher = Matcher},
-        1,
-        default_options()
-    ).
+    assert(probe(Probe));
+assert(Probe = #probe{}) ->
+    assert(Probe, default_matcher()).
 
 assert(Probe, Matcher) when is_function(Probe, 0), is_function(Matcher, 1) ->
-    Probe1 = fun(_) -> Probe() end,
-    do_assert(
-        #probe{probe = Probe1, state = undefined}, #matcher{matcher = Matcher}, 1, default_options()
-    );
+    assert(probe(Probe), match(Matcher));
 assert(Probe, Options) when is_function(Probe, 0), is_map(Options) ->
-    Probe1 = fun(_) -> Probe() end,
-    Matcher = fun(Value) -> Value end,
-    do_assert(
-        #probe{probe = Probe1, state = undefined},
-        #matcher{matcher = Matcher},
-        1,
-        default_options(Options)
-    );
-assert({Probe, Init}, Matcher) when is_function(Probe, 1), is_function(Matcher, 1) ->
-    do_assert(
-        #probe{probe = Probe, state = Init}, #matcher{matcher = Matcher}, 1, default_options()
-    );
-assert(#{probe := Probe, description := ProbeDescription}, #{
-    matcher := Matcher, description := MatcherDescription
-}) when
-    is_function(Probe, 0), is_function(Matcher, 1)
-->
-    Probe1 = fun(_) -> Probe() end,
-    do_assert(
-        #probe{probe = Probe1, state = undefined, description = ProbeDescription},
-        #matcher{matcher = Matcher, description = MatcherDescription},
-        1,
-        default_options()
-    );
-assert(#{probe := Probe, state := Init, description := ProbeDescription}, #{
-    matcher := Matcher, description := MatcherDescription
-}) when
-    is_function(Probe, 1), is_function(Matcher, 1)
-->
-    do_assert(
-        #probe{probe = Probe, state = Init, description = ProbeDescription},
-        #matcher{matcher = Matcher, description = MatcherDescription},
-        1,
-        default_options()
-    ).
+    assert(probe(Probe), default_matcher(), Options);
+assert(Probe = #probe{}, Matcher = #matcher{}) ->
+    assert(Probe, Matcher, #{}).
 
-assert({Probe, Init}, Matcher, Options) when
-    is_function(Probe, 1), is_function(Matcher, 1), is_map(Options)
-->
+assert(Probe = #probe{}, Matcher = #matcher{}, Options) when is_map(Options) ->
     do_assert(
-        #probe{probe = Probe, state = Init},
-        #matcher{matcher = Matcher},
+        Probe,
+        Matcher,
         1,
         default_options(Options)
     ).
