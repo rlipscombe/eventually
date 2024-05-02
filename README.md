@@ -131,5 +131,4 @@ This allows polling until you get a well-formed result, without retrying if it d
 ## Future
 
 - Do we want to allow configurable (exponential) backoff for retries?
-- Labels/descriptions for the probe.
 - Combinators: `all` and `any`, e.g.
