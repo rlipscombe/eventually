@@ -32,13 +32,19 @@ probe(Fun) when is_function(Fun, 0) ->
     Description = get_fun_description(Fun),
     probe(Fun1, undefined, Description).
 
-probe(Fun, Init) when is_function(Fun, 1) ->
-    Description = get_fun_description(Fun),
-    probe(Fun, Init, Description);
+probe(Fun, M = #matcher{}) ->
+    % Occasionally, you'll get your indentation wrong; we should catch that.
+    error(badarg, [Fun, M]);
 probe(Fun, Description) when is_function(Fun, 0) ->
     Fun1 = fun(_) -> Fun() end,
-    probe(Fun1, undefined, Description).
+    probe(Fun1, undefined, Description);
+probe(Fun, Init) when is_function(Fun, 1) ->
+    Description = get_fun_description(Fun),
+    probe(Fun, Init, Description).
 
+probe(Fun, Init, M = #matcher{}) ->
+    % Occasionally, you'll get your indentation wrong; we should catch that.
+    error(badarg, [Fun, Init, M]);
 probe(Fun, Init, Description) when is_function(Fun, 1) ->
     #probe{
         description = Description,
