@@ -118,7 +118,7 @@ do_assert(
                 {'EXIT', _} ->
                     do_retry(NextProbe, Matcher, Attempt, Options);
                 Other ->
-                    error(bad_return_from_matcher, Other)
+                    error({bad_return_value_from_matcher, Other})
             end
     end;
 do_assert(
@@ -138,8 +138,8 @@ do_assert(
             Result;
         false ->
             assert_error(Probe, Matcher);
-        _ ->
-            error(bad_return)
+        Other ->
+            error({bad_return_value_from_matcher, Other})
     end.
 
 do_retry(
