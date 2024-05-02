@@ -158,6 +158,7 @@ do_retry(
     do_assert(Probe, Matcher, Attempt + 1, Options).
 
 assert_error(Probe, Matcher) ->
+    % TODO: Better error reporting would included "called as" for the matcher. How can we finagle that?
     erlang:error(eventually_assert_failed, [Probe, Matcher], [{error_info, #{module => ?MODULE}}]).
 
 format_error(_Reason, [{_M, _F, _Args = [Probe, Matcher], Info} | _]) ->
