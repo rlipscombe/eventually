@@ -130,5 +130,7 @@ This allows polling until you get a well-formed result, without retrying if it d
 
 ## Future
 
+- Those examples above ^^ ought to be tested, somehow.
+- It would be nice if failure reports included (at least) the last value passed to the matcher.
 - Do we want to allow configurable (exponential) backoff for retries?
 - Combinators: `all` and `any`, e.g.
