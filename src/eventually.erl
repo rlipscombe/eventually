@@ -9,7 +9,10 @@
 
     assert/1,
     assert/2,
-    assert/3
+    assert/3,
+
+    always/0,
+    never/0
 ]).
 -export([format_error/2]).
 
@@ -61,6 +64,12 @@ match(Fun, Description) when is_function(Fun, 1) ->
         description = Description,
         matcher = Fun
     }.
+
+always() ->
+    match(fun(_) -> true end, always).
+
+never() ->
+    match(fun(_) -> false end, never).
 
 default_matcher() ->
     match(fun(Value) -> Value end, default_matcher).
