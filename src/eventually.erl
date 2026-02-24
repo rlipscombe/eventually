@@ -116,12 +116,10 @@ do_assert(
     Attempt < MaxAttempts
 ->
     % Because this is not the final attempt, we'll catch any exceptions and retry.
-    case catch ProbeFun(ProbeState) of
-        {'EXIT', _} ->
-            do_retry(Probe, Matcher, Attempt, Options);
+    try ProbeFun(ProbeState) of
         NextState ->
             NextProbe = Probe#probe{state = NextState},
-            case catch MatcherFun(NextState) of
+            try MatcherFun(NextState) of
                 ok ->
                     true;
                 true ->
@@ -130,11 +128,15 @@ do_assert(
                     Result;
                 false ->
                     do_retry(NextProbe, Matcher, Attempt, Options);
-                {'EXIT', _} ->
-                    do_retry(NextProbe, Matcher, Attempt, Options);
                 Other ->
                     error({bad_return_value_from_matcher, Other})
+            catch
+                _:_ ->
+                    do_retry(NextProbe, Matcher, Attempt, Options)
             end
+    catch
+        _:_ ->
+            do_retry(Probe, Matcher, Attempt, Options)
     end;
 do_assert(
     Probe = #probe{probe = ProbeFun, state = ProbeState},
